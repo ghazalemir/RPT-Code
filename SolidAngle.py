@@ -38,6 +38,11 @@ def find_h_rho(position_detector_face,position_detector_middle):
         distance_vector=[]
         for i in range (0,3):
             distance_vector.append(position_particle[j][i]-position_detector_face[i])
+        
+        
+        #T defines the distance between the particle and the detector
+        T=LA.norm(distance_vector)
+        V_T.append(T)
 
         #Projection of the distance vector on the detector axis which is parallel to the z' axis
         K=np.dot(distance_vector,detector_orientation)
@@ -47,6 +52,7 @@ def find_h_rho(position_detector_face,position_detector_middle):
         rho=np.fabs(LA.norm(K*detector_orientation-distance_vector))
         V_rho.append(rho)
 
+    print(V_t)
     return V_rho,V_h
 #rho and h as output of this function will be used in solid angle calculation   
 
