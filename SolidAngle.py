@@ -53,7 +53,7 @@ def find_h_rho(position_detector_face,position_detector_middle):
         rho=np.fabs(LA.norm(K*detector_orientation-distance_vector))
         V_rho.append(rho)
 
-    print(V_t)
+    print(V_T)
     return V_rho,V_h
 #rho and h as output of this function will be used in solid angle calculation   
 
