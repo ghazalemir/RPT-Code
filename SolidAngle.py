@@ -401,7 +401,8 @@ def count (position_detector_face,position_detector_middle):
     print(V_count)
     return(V_count)
 
-solid_angle([0.15,0,0.3],[0.17,0,0.3])
+count([0.15,0,0.3],[0.17,0,0.3])
+#solid_angle([0.15,0,0.3],[0.17,0,0.3])
 #find_h_rho([4,1,5],[6,1,5])
 #transformation([-1,2,3],[-4,3,1],[-5,3,2])
 #path_length_reactor(0,0,8,[7.9,1,0],[10,1,5],[12,1,5])
