@@ -379,6 +379,20 @@ def path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
 
 """
 """
+def count (position_detector_face,position_detector_middle):
+    T=1
+    nui=2
+    R=2e6
+    tui=1e-5
+    phi=0.4
+    V_count=[]
+    V_Psi=solid_angle(position_detector_face,position_detector_middle)
+    
+    for i in range(0,len(position_particle)):
+        V_count.append((T*nui*R*phi*V_Psi[i])/(1+(tui*nui*R*phi*V_Psi[i])))
+    
+    print(V_count)
+    return(V_count)
 
 solid_angle([0.15,0,0.3],[0.17,0,0.3])
 #find_h_rho([4,1,5],[6,1,5])
