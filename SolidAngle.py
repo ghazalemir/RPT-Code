@@ -15,7 +15,7 @@ from scipy.optimize import minimize
 """
 """
 #Open the file the that includes particle positions
-position_particle=np.loadtxt("./Testdata.txt")
+position_particle=np.loadtxt("./Test1.txt")
 
 #The function "find_h_rho" calculate the rho and h for all the positions
 def find_h_rho(position_detector_face,position_detector_middle):
