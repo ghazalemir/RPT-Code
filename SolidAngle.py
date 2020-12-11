@@ -57,8 +57,7 @@ def find_h_rho(position_detector_face,position_detector_middle):
 def solid_angle (position_detector_face,
                  position_detector_middle):
     """
-    The following constants are exteractet form this article: "Optimization of detector positioning in the radioactive particle
-    tracking technique".
+    The following constants are extracted from this article: "Optimization of detector positioning in the radioactive particle tracking technique".
     """
     r_cristal=0.0381
     l_cristal=0.0762
