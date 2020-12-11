@@ -23,6 +23,7 @@ def find_h_rho(position_detector_face,position_detector_middle):
     detector_orientation=[]
     V_rho=[]
     V_h=[]
+    V_T=[]
     
     #This "for" loop calculates the orientation of the detector using two points on the detector axis
     for i in range (0,3):
