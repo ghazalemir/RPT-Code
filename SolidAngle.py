@@ -56,11 +56,16 @@ def find_h_rho(position_detector_face,position_detector_middle):
 
 def solid_angle (position_detector_face,
                  position_detector_middle):
-    r_cristal=1
-    l_cristal=5
-    r_reactor=8
-    mu_d=0.21477
-    Monte_Carlo_iteration=10
+    """
+    The following constants are exteractet form this article: "Optimization of detector positioning in the radioactive particle
+    tracking technique".
+    """
+    r_cristal=0.0381
+    l_cristal=0.0762
+    r_reactor=0.1
+    mu_d=21.477
+    mu_r=10
+    Monte_Carlo_iteration=1000
     
     """
     The four following vectors (V_...) store weight factors for alpha and theta, and the path length
@@ -71,8 +76,10 @@ def solid_angle (position_detector_face,
     V_W_alpha=[]
     V_V_depth_detector=[]
     V_V_depth=[] 
-    V_a=[]
-    V_b=[]
+    
+    #Psi is calculated based on Equation 3 in the document.
+    V_Psi=[]
+    
     
     #Call the function that calculates rho and h for each position
     V_rho,V_h=find_h_rho(position_detector_face,position_detector_middle)
@@ -97,13 +104,12 @@ def solid_angle (position_detector_face,
         V_OB=[]
         V_depth_detector=[]
         V_depth=[]
-
-    
-        #Start the Monte Carlo
+        Psi=0
         
+        #Start the Monte Carlo
         for i in range (Monte_Carlo_iteration):
-            a=0
-            b=0
+            
+          
             """
             First "if" condition defines that the particle position is in the detector's face 
             or it can view the detector from both lateral side and top.
@@ -156,16 +162,9 @@ def solid_angle (position_detector_face,
                                   position_detector_middle,position_particle[j])
                
                V_depth.append(depth)
+                
+               Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
                
-               """
-                a,b will be used in optimization part as (ax+b) and x is (exp(-mu_r))
-                a=w(alpha)*w(theta)*(1-exp(-mu_d*(path_length_detector)))
-                b=w(alpha)*w(theta)*(1-exp(-mu_d*(path_length_detector)))*exp(path_length_reactor)
-               """ 
-               a+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
-               b+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*depth)
-               
-            
 
             else:
                 alpha_max = np.arcsin(r_cristal/V_rho[j])
@@ -202,14 +201,13 @@ def solid_angle (position_detector_face,
                 V_depth.append(depth)
                 
 
-                a+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
-                b+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*depth)
+                Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
+                
             
         
-        a=a/Monte_Carlo_iteration
-        V_a.append(a)
-        b=b/Monte_Carlo_iteration
-        V_b.append(b)
+        Psi=Psi/Monte_Carlo_iteration
+        V_Psi.append(Psi)
+
         
         
         """
@@ -222,8 +220,8 @@ def solid_angle (position_detector_face,
     
 
     
-    
-    return (V_a,V_b)
+    print(V_Psi)
+    return (V_Psi)
     
        
 """        
@@ -383,7 +381,7 @@ def path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
 """
 """
 
-solid_angle([40,1,1.1],[42,1,1.1])
+solid_angle([0.15,0,0.3],[0.17,0,0.3])
 #find_h_rho([4,1,5],[6,1,5])
 #transformation([-1,2,3],[-4,3,1],[-5,3,2])
 #path_length_reactor(0,0,8,[7.9,1,0],[10,1,5],[12,1,5])
