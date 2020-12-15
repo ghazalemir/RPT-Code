@@ -1,7 +1,7 @@
 # RPT-Code
 
 Test8:
-These data set test the count while positions change vertically. For these data set we have both rho<r and rho>r.
+These data set test the count while positions change vertically. For these data set we have both rho<r,rho>r.
 
 Test9:
 These data set test the count while positions change horizontally. For these data set rho<r.
