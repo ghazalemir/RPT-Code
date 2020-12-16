@@ -189,11 +189,11 @@ def solid_angle (position_detector_face,
             
                 tetha_min = np.arctan(OB/(V_h[j]+l_cristal))          
                 tetha_max = np.arctan(OA/V_h[j])  
-                tetha_cri = np.arctan(OB/(V_h[j]+l_cristal))
+                tetha_cri = np.arctan(OB/V_h[j])
                 tetha = np.arccos(math.cos(tetha_min) - np.random.random_sample() * (math.cos(tetha_min)
                    - math.cos(tetha_max)))
                 V_tetha.append(tetha)
-                W_tetha.append (math.cos(tetha_min) - math.cos(tetha_max)/2)
+                W_tetha.append ((math.cos(tetha_min) - math.cos(tetha_max))/2)
                 depth_detector=path_length_detector_two(OA,OB,V_rho[j],r_cristal
                                                         ,l_cristal,alpha,tetha,V_h[j],tetha_cri)
                 V_depth_detector.append(depth_detector)
