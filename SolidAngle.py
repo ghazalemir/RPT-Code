@@ -11,6 +11,8 @@ from numpy import linalg as LA
 from sympy.abc import x, y, z, X, Y, Z, t, r
 from sympy.solvers import solve
 from scipy.optimize import minimize
+import sympy
+from scipy.optimize import fsolve
 
 """
 """
@@ -72,7 +74,7 @@ def solid_angle (position_detector_face,
     r_reactor=0.1
     mu_d=21.477
     mu_r=10
-    Monte_Carlo_iteration=1000000
+    Monte_Carlo_iteration=1000
     
     """
     The four following vectors (V_...) store weight factors for alpha and theta, and the path length
@@ -166,13 +168,13 @@ def solid_angle (position_detector_face,
                depth is the ray's path length inside the reactor which is calculated using a function
                out side of the "solid angle", path_length_reactor
                """
-               #depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
-                                  #position_detector_middle,position_particle[j])
+               depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
+                                  position_detector_middle,position_particle[j])
                
                #V_depth.append(depth)
                 
-               #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
-               Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
+               Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
+               #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
 
             else:
                 alpha_max = np.arcsin(r_cristal/V_rho[j])
@@ -203,15 +205,15 @@ def solid_angle (position_detector_face,
                
                 
         
-                #depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
-                                  #position_detector_middle,position_particle[j])
+                depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
+                                  position_detector_middle,position_particle[j])
                 #print(depth)
                 
                 #V_depth.append(depth)
                 
 
-                #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
-                Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
+                Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
+                #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
             
         
         Psi=Psi/Monte_Carlo_iteration
@@ -229,7 +231,7 @@ def solid_angle (position_detector_face,
     
 
     
-    print(V_Psi)
+    #print(V_Psi)
     return (V_Psi)
     
        
@@ -345,7 +347,8 @@ def path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
         
         #Solve the parametric equation of the circle to find "t"
         func=pow(x,2)+pow(y,2)-pow(r_reactor,2)
-        M=solve(func,t)
+        F=sympy.lambdify(t,func)
+        M=fsolve(F,(-1,1))
 
         #Substituting parameter t
         for i in range(0,3):
