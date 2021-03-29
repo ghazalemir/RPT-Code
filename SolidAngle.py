@@ -18,6 +18,7 @@ from scipy.optimize import fsolve
 """
 #Open the file the that includes particle positions
 position_particle=np.loadtxt("./Test8.txt")
+#try learning git
 
 #The function "find_h_rho" calculate the rho and h for all the positions
 def find_h_rho(position_detector_face,position_detector_middle):
