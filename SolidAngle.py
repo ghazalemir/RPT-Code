@@ -16,19 +16,19 @@ from scipy.optimize import fsolve
 
 """
 """
-#Open the file the that includes particle positions
+#Open the file the that includes particle positions (Mesh reading)
+
 position_particle=np.loadtxt("./Test8.txt")
 
-
 #The function "find_h_rho" calculate the rho and h for all the positions
+
 def find_h_rho(position_detector_face,position_detector_middle):
     
     detector_orientation=[]
     V_rho=[]
     V_h=[]
-    V_T=[]
     
-    #This "for" loop calculates the orientation of the detector using two points on the detector axis
+    #This "for" loop calculates the orientation of the detector using two points on the detector axis (e'z)
     for i in range (0,3):
         detector_orientation.append(position_detector_face[i]-position_detector_middle[i])
         
@@ -36,29 +36,30 @@ def find_h_rho(position_detector_face,position_detector_middle):
     
     
     #Loop over all the positions to calculate rho and h  
+
     for j in range (0,len(position_particle)):
         
-        #Distance vector is a vector from a point on the detector face to the particle position
+        #Distance vector is a vector from a point on the detector face to the particle position (Xdp)
         distance_vector=[]
         for i in range (0,3):
             distance_vector.append(position_particle[j][i]-position_detector_face[i])
         
-        
-        #T defines the distance between the particle and the detector
-        T=LA.norm(distance_vector)
-        V_T.append(T)
-
         #Projection of the distance vector on the detector axis which is parallel to the z' axis
+        #k is (z'p)
+
         K=np.dot(distance_vector,detector_orientation)
         h=np.fabs(K) 
         V_h.append(h)
         
+        # to calculate pho use equation 29
+
         rho=np.fabs(LA.norm(h*detector_orientation-distance_vector))
         V_rho.append(rho)
         
-    #print(V_rho)
+
     
     return V_rho,V_h
+
 #rho and h as output of this function will be used in solid angle calculation   
 
 
@@ -77,87 +78,68 @@ def solid_angle (position_detector_face,
     mu_r=10
     Monte_Carlo_iteration=1000
     
-    """
-    The four following vectors (V_...) store weight factors for alpha and theta, and the path length
-    in detector and reactor for all the position. They contain vectors that stores 
-    the mentioned parameters for each iteration of the Monte Carlo
-    """
-    V_W_tetha=[]
-    V_W_alpha=[]
-    V_V_depth_detector=[]
-    V_V_depth=[] 
-    
-    #Psi is calculated based on Equation 3 in the document.
+
+    #Psi is calculated based on Equation 3 in the document, which is the detector efficiency
+
     V_Psi=[]
     
-    
     #Call the function that calculates rho and h for each position
+
     V_rho,V_h=find_h_rho(position_detector_face,position_detector_middle)
-    #Loop over all the position to do the Monte Carlo calculation
+
+    #Loop over all the position to do the Monte Carlo calculation for each mesh point
+
     for j in range (0,len(position_particle)):
         
-        """
-        W_tetha and W_alpha store the weight factor for each iteration of the Monte Carlo
-        for a specific position
-        """
-        W_tetha=[]
-        W_alpha=[]
         
         """
-        The following vectors starting with (V_...) store related parameter for each iteration
+        The following vector starting with (V_...) store related parameter for each iteration
         of the Monte Carlo for a specific position
         """
-        V_tetha=[]
-        V_alpha=[]
-        V_alpha_max=[]
-        V_OA=[]
-        V_OB=[]
         V_depth_detector=[]
-        V_depth=[]
+
         Psi=0
         
-        #Start the Monte Carlo
+        #Start the Monte Carlo simulation
+
         for i in range (Monte_Carlo_iteration):
             
-          
             """
             First "if" condition defines that the particle position is in the detector's face 
-            or it can view the detector from both lateral side and top.
+            or it can view the detector from both lateral and top side.
             """
             if V_rho[j] < r_cristal:
-                #Check from here
                tetha_max = np.arctan((r_cristal+V_rho[j])/V_h[j])
                tetha_cri = np.arctan((r_cristal-V_rho[j])/V_h[j])
                tetha_min = 0.0
+
                #Here the np.random generate the random number for theta calculation
+
                tetha=np.arccos(math.cos(tetha_min)- np.random.random_sample() * 
                              (math.cos(tetha_min)-math.cos(tetha_max)))
-               #Store the theta and it's weight factor
-               V_tetha.append(tetha)            
-               W_tetha.append((math.cos(tetha_min) - math.cos(tetha_max))/2)
+
+             
+               W_tetha=((math.cos(tetha_min) - math.cos(tetha_max))/2)
                
            
                if tetha < tetha_cri :
-                  #Here
+          
                   alpha_max = math.pi
-                  V_alpha_max.append(alpha_max)
                   alpha=alpha_max*(2* np.random.random_sample()-1)
-                  V_alpha.append(alpha)
-                  W_alpha.append(1)
+                  W_alpha=1
                 
                   OA = V_rho[j] * math.cos(alpha) + pow(pow(r_cristal,2) - 
                   (pow(V_rho[j],2)*pow(math.sin(alpha),2)),0.5)
-                  V_OA.append(OA)
                else:
                     alpha_max = math.acos((pow(V_rho[j], 2) + pow((V_h[j] * math.tan(tetha)), 2) -
                                         pow(r_cristal, 2)) / (2 * V_h[j] * V_rho[j] * math.tan(tetha)))
-                    V_alpha_max.append(alpha_max)
+
                     alpha=alpha_max*(2* np.random.random_sample()-1)
-                    V_alpha.append(alpha)
-                    W_alpha.append(alpha_max/math.pi)
+
+                    W_alpha=(alpha_max/math.pi)
                     OA = V_rho[j] * math.cos(alpha) + pow(pow(r_cristal,2) - 
                         (pow(V_rho[j],2)*pow(math.sin(alpha),2)),0.5)
-                    V_OA.append(OA)
+
                """
                depth_detector is the ray's path length inside the detector which is 
                calculated using a function out side of the "solid angle", path_length_detector
@@ -172,34 +154,31 @@ def solid_angle (position_detector_face,
                depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
                                   position_detector_middle,position_particle[j])
                
-               #V_depth.append(depth)
+            
                 
-               Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
-               #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
+               Psi+=W_alpha*W_tetha*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
+               #Psi+=W_alpha*W_tetha*(1-np.exp(-1*mu_d*depth_detector))
 
             else:
                 alpha_max = np.arcsin(r_cristal/V_rho[j])
                 alpha=alpha_max*(2*np.random.random_sample()-1)
-                V_alpha.append(alpha)
-                W_alpha.append(alpha_max/math.pi)
+                W_alpha=(alpha_max/math.pi)
             
                 OB = V_rho[j] * math.cos(alpha) - pow(pow(r_cristal,2) - 
                  (pow(V_rho[j],2)*pow(math.sin(alpha),2)),0.5)
-                V_OB.append(OB)
+   
             
             
                 OA = V_rho[j] * math.cos(alpha) + pow(pow(r_cristal,2) - 
              (pow(V_rho[j],2)*pow(math.sin(alpha),2)),0.5)
-                V_OA.append(OA)
+
             
                 tetha_min = np.arctan(OB/(V_h[j]+l_cristal))          
-                tetha_max = np.arctan(OA/V_h[j])
-                #I have changed theta_cri  
+                tetha_max = np.arctan(OA/V_h[j]) 
                 tetha_cri = np.arctan(OB/V_h[j]) 
                 tetha = np.arccos(math.cos(tetha_min) - np.random.random_sample() * (math.cos(tetha_min)- math.cos(tetha_max)))
-                V_tetha.append(tetha)
-                #I have changed here
-                W_tetha.append ((math.cos(tetha_min) - math.cos(tetha_max))/2)
+
+                W_tetha=((math.cos(tetha_min) - math.cos(tetha_max))/2)
                 depth_detector=path_length_detector_two(OA,OB,V_rho[j],r_cristal
                                                         ,l_cristal,alpha,tetha,V_h[j],tetha_cri)
                 V_depth_detector.append(depth_detector)
@@ -208,31 +187,19 @@ def solid_angle (position_detector_face,
         
                 depth=path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
                                   position_detector_middle,position_particle[j])
-                #print(depth)
-                
-                #V_depth.append(depth)
+
                 
 
-                Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
-                #Psi+=W_alpha[i]*W_tetha[i]*(1-np.exp(-1*mu_d*depth_detector))
+                
+
+                Psi+=W_alpha*W_tetha*(1-np.exp(-1*mu_d*depth_detector))*np.exp(-1*mu_r*depth)
+                #Psi+=W_alpha*W_tetha*(1-np.exp(-1*mu_d*depth_detector))
             
         
         Psi=Psi/Monte_Carlo_iteration
         V_Psi.append(Psi)
 
         
-        
-        """
-        Store the weight factor of alpha and theta and the path length
-        """
-        V_W_tetha.append(W_tetha)
-        V_W_alpha.append(W_alpha)
-        V_V_depth_detector.append(V_depth_detector)
-        #V_V_depth.append(V_depth)
-    
-
-    
-    #print(V_Psi)
     return (V_Psi)
     
        
@@ -393,6 +360,7 @@ def path_length_reactor(alpha,tetha,r_reactor,position_detector_face,
 
 """
 """
+
 def count (position_detector_face,position_detector_middle):
     T=1
     nui=2
