@@ -1,5 +1,9 @@
 # RPT-Code
 
+SolidAngle.py is a Python Code for detector efficiency calculation using MonteCarlo approach.
+
+
+
 Test8:
 These data set test the count while positions change vertically. For these data set we have both rho<r,rho>r.
 
